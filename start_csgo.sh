@@ -10,7 +10,7 @@ screen -dmS "$screen_name" ./srcds_run -game csgo -usercon +game_type 0 +game_mo
 sleep 1
 
 # Get the PID of the screen session
-screen_pid=$(screen -ls | awk -v name="$screen_name" '$0 ~ name { gsub("[^0-9]", "", $1); print $1 }')
+screen_pid=$(screen -ls | grep -w "$screen_name" | awk -F '.' '{print $1}')
 
 if [ -n "$screen_pid" ]; then
     echo "Screen session name: $screen_name"
