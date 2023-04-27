@@ -2,11 +2,17 @@ import os
 import discord
 from discord.ext import commands
 import paramiko
+import boto3
 
 TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 SSH_USER = os.environ["SSH_USER"]
 SSH_SERVER_IP = os.environ["SSH_SERVER_IP"]
 SSH_PASSWORD = os.environ["SSH_PASSWORD"]
+
+
+# AWS Configuration
+REGION = os.environ["AWS_REGION"]
+INSTANCE_ID = os.environ["EC2_INSTANCE_ID"]
 
 intents = discord.Intents.all()
 intents.members = True
@@ -60,5 +66,24 @@ async def run_script_command(ctx, script_name, user=None):
         print(f"Sending error to Discord:")
         print(f"```\nError: {str(e)}\n```")
         await ctx.send(f"```\nError: {str(e)}\n```")
+        
+        
+@bot.command(name="ec2Start")
+async def ec2_start(ctx):
+    try:
+        ec2 = boto3.client("ec2", region_name=REGION)
+        response = ec2.start_instances(InstanceIds=[INSTANCE_ID])
+        await ctx.send(f"Starting EC2 instance `{INSTANCE_ID}`: {response}")
+    except Exception as e:
+        await ctx.send(f"Error starting EC2 instance: {str(e)}")
+
+@bot.command(name="ec2Stop")
+async def ec2_stop(ctx):
+    try:
+        ec2 = boto3.client("ec2", region_name=REGION)
+        response = ec2.stop_instances(InstanceIds=[INSTANCE_ID])
+        await ctx.send(f"Stopping EC2 instance `{INSTANCE_ID}`: {response}")
+    except Exception as e:
+        await ctx.send(f"Error stopping EC2 instance: {str(e)}")
 
 bot.run(TOKEN)
